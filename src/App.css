@@ -1,0 +1,13 @@
+.linkshop{
+    border: solid;
+    width: 120px;
+    border-radius: 10px;
+    background-color: rgb(255, 146, 56);
+    text-align: center;
+
+}
+.linkshop a{
+    text-decoration: none;
+    color: black;
+    
+}
