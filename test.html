@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Chat Interface</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f0f2f5;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    h1 {
+      color: #1a73e8;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    
+    #chatBox {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      height: 400px;
+      overflow-y: auto;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    
+    .message {
+      margin: 10px 0;
+      padding: 10px 15px;
+      border-radius: 15px;
+      max-width: 70%;
+      word-wrap: break-word;
+    }
+    
+    .user {
+      margin-left: auto;
+      background-color: #1a73e8;
+      color: white;
+    }
+    
+    .bot {
+      background-color: #f1f3f4;
+      color: #202124;
+    }
+    
+    #chatForm {
+      display: flex;
+      gap: 10px;
+    }
+    
+    #userInput {
+      flex: 1;
+      padding: 12px;
+      border: 1px solid #dadce0;
+      border-radius: 24px;
+      font-size: 16px;
+      outline: none;
+    }
+    
+    #userInput:focus {
+      border-color: #1a73e8;
+      box-shadow: 0 0 0 2px rgba(26,115,232,0.2);
+    }
+    
+    button {
+      background-color: #1a73e8;
+      color: white;
+      border: none;
+      border-radius: 24px;
+      padding: 12px 24px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.2s;
+    }
+    
+    button:hover {
+      background-color: #1557b0;
+    }
+    
+    .error {
+      color: #d93025;
+      text-align: center;
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>AI Chat Interface</h1>
+    <div id="chatBox"></div>
+    <form id="chatForm">
+      <input type="text" id="userInput" placeholder="Type your message..." required>
+      <button type="submit">Send</button>
+    </form>
+  </div>
+
+  <script>
+    const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
+    const API_KEY = 'AIzaSyC0bz27zcap-Xi1xBGDHLtGP8oqpHfgi_o'; // ใส่ API key ของคุณที่นี่
+
+    const chatBox = document.getElementById('chatBox');
+    const chatForm = document.getElementById('chatForm');
+    const userInput = document.getElementById('userInput');
+
+    chatForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const userMessage = userInput.value;
+      if (!userMessage.trim()) return;
+      
+      addMessage(userMessage, 'user');
+      userInput.value = '';
+      userInput.disabled = true;
+      
+      try {
+        const botResponse = await getBotResponse(userMessage);
+        addMessage(botResponse, 'bot');
+      } catch (error) {
+        addError('Failed to get response. Please try again.');
+      } finally {
+        userInput.disabled = false;
+        userInput.focus();
+      }
+    });
+
+    function addMessage(message, sender) {
+      const messageElement = document.createElement('div');
+      messageElement.textContent = message;
+      messageElement.className = `message ${sender}`;
+      chatBox.appendChild(messageElement);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function addError(message) {
+      const errorElement = document.createElement('div');
+      errorElement.textContent = message;
+      errorElement.className = 'error';
+      chatBox.appendChild(errorElement);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    async function getBotResponse(message) {
+      try {
+        const response = await fetch(`${API_URL}?key=${API_KEY}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            contents: [{
+              parts: [{
+                text: message
+              }]
+            }],
+            generationConfig: {
+              temperature: 0.7,
+              maxOutputTokens: 800,
+            }
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error('API Error:', errorData);
+          throw new Error(errorData.error?.message || 'API request failed');
+        }
+
+        const data = await response.json();
+        return data.candidates[0].content.parts[0].text;
+      } catch (error) {
+        console.error('Error:', error);
+        throw error;
+      }
+    }
+  </script>
+</body>
+</html>

@@ -10,8 +10,8 @@ import Footer from "./companents/flooter";
 import ContactUs from "./page/About";
 // import Modal_save from "./companents/Modal_save";
 import './App.css';
-// export const URI = "https://student.crru.ac.th/651463045/drugapi/";
-export const URI = "http://localhost/drug_api/";
+export const URI = "https://student.crru.ac.th/651463045/drugapi/";
+// export const URI = "http://localhost/drug_api/";
 
 function App() {
   return (
